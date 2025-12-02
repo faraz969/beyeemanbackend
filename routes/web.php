@@ -14,14 +14,32 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    // If already authenticated, redirect to dashboard
+    if (auth()->check()) {
+        if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin')) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('dashboard');
+    }
+    // Otherwise show login page
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
 
-// Admin Routes
+// Admin landing page (shows login)
+Route::get('/admin', function () {
+    // If already authenticated as admin, redirect to dashboard
+    if (auth()->check() && (auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin'))) {
+        return redirect()->route('admin.dashboard');
+    }
+    // Otherwise show login page
+    return view('auth.login');
+})->name('admin');
+
+// Admin Routes (protected)
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
     

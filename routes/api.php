@@ -46,6 +46,9 @@ Route::prefix('vendor')->group(function () {
     Route::post('/verify-otp', [VendorAuthController::class, 'verifyOtp']);
     Route::post('/register', [VendorAuthController::class, 'register']);
     Route::post('/login', [VendorAuthController::class, 'login']);
+    Route::post('/forgot-password/send-otp', [VendorAuthController::class, 'sendPasswordResetOtp']);
+    Route::post('/forgot-password/verify-otp', [VendorAuthController::class, 'verifyPasswordResetOtp']);
+    Route::post('/forgot-password/reset', [VendorAuthController::class, 'resetPassword']);
 });
 
 // Protected Vendor Routes
@@ -112,6 +115,9 @@ Route::prefix('customer')->group(function () {
     Route::post('/verify-otp', [CustomerAuthController::class, 'verifyOtp']);
     Route::post('/register', [CustomerAuthController::class, 'register']);
     Route::post('/login', [CustomerAuthController::class, 'login']);
+    Route::post('/forgot-password/send-otp', [CustomerAuthController::class, 'sendPasswordResetOtp']);
+    Route::post('/forgot-password/verify-otp', [CustomerAuthController::class, 'verifyPasswordResetOtp']);
+    Route::post('/forgot-password/reset', [CustomerAuthController::class, 'resetPassword']);
 });
 
 // Public Customer Routes

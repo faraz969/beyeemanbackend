@@ -226,5 +226,172 @@ class CustomerAuthController extends Controller
             ],
         ]);
     }
+
+    // Send OTP for Password Reset
+    public function sendPasswordResetOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check if user exists and is a customer
+        $user = User::where('phone', $request->phone)
+            ->where('user_type', 'customer')
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No customer account found with this phone number',
+            ], 404);
+        }
+
+        // Send OTP via Arkesel SMS service
+        $result = $this->smsService->generateOtp($request->phone);
+
+        if ($result['success']) {
+            return response()->json([
+                'success' => true,
+                'message' => $result['message'],
+            ]);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'],
+            ], 400);
+        }
+    }
+
+    // Verify OTP for Password Reset
+    public function verifyPasswordResetOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+            'otp' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check if user exists and is a customer
+        $user = User::where('phone', $request->phone)
+            ->where('user_type', 'customer')
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No customer account found with this phone number',
+            ], 404);
+        }
+
+        // Verify OTP via Arkesel SMS service
+        try {
+            $result = $this->smsService->verifyOtp($request->phone, $request->otp);
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'OTP verified successfully. You can now reset your password.',
+                ]);
+            } else {
+                $responseData = [
+                    'success' => false,
+                    'message' => $result['message'] ?? 'OTP verification failed',
+                ];
+                
+                if (isset($result['otp_expired']) && $result['otp_expired']) {
+                    $responseData['otp_expired'] = true;
+                }
+                
+                return response()->json($responseData, 400);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Customer Password Reset OTP Verification Error', [
+                'message' => $e->getMessage(),
+                'phone' => $request->phone,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while verifying OTP. Please try again.',
+            ], 500);
+        }
+    }
+
+    // Reset Password
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string',
+            'otp' => 'required|string',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Check if user exists and is a customer
+        $user = User::where('phone', $request->phone)
+            ->where('user_type', 'customer')
+            ->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No customer account found with this phone number',
+            ], 404);
+        }
+
+        // Verify OTP one more time before resetting password
+        try {
+            $result = $this->smsService->verifyOtp($request->phone, $request->otp);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message'] ?? 'OTP verification failed. Please request a new OTP.',
+                ], 400);
+            }
+
+            // OTP verified, update password
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successfully. You can now login with your new password.',
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Customer Password Reset Error', [
+                'message' => $e->getMessage(),
+                'phone' => $request->phone,
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while resetting password. Please try again.',
+            ], 500);
+        }
+    }
 }
 

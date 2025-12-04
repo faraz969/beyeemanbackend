@@ -19,15 +19,13 @@ Route::get('/', function () {
         if (auth()->user()->hasRole('admin') || auth()->user()->hasRole('super-admin')) {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('dashboard');
+        return redirect()->route('admin.dashboard');
     }
     // Otherwise show login page
     return view('auth.login');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+
 
 // Admin landing page (shows login)
 Route::get('/admin', function () {

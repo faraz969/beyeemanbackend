@@ -54,6 +54,8 @@ Route::middleware('auth:sanctum')->prefix('vendor')->group(function () {
     Route::post('/shop', [ShopController::class, 'store']);
     Route::get('/shop', [ShopController::class, 'show']);
     Route::post('/shop/delivery-zone', [ShopController::class, 'addDeliveryZone']);
+    Route::put('/shop/delivery-zone/{id}', [ShopController::class, 'updateDeliveryZone']);
+    Route::delete('/shop/delivery-zone/{id}', [ShopController::class, 'deleteDeliveryZone']);
     Route::post('/shop/payment-details', [ShopController::class, 'savePaymentDetails']);
     
     // Subscription Routes

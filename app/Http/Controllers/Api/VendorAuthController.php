@@ -128,7 +128,7 @@ class VendorAuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'full_name' => 'required|string|max:255',
-            'business_email' => 'required|email|unique:vendors,business_email',
+            'business_email' => 'nullable|email|unique:vendors,business_email',
             'phone' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -158,22 +158,31 @@ class VendorAuthController extends Controller
             ], 400);
         }
 
+        // Generate a temporary email if not provided
+        $userEmail = $request->business_email ?? 'vendor_' . $request->phone . '@temp.com';
+        
         // Update user with registration details
         $user->update([
             'name' => $request->full_name,
-            'email' => $request->business_email,
+            'email' => $userEmail,
             'password' => Hash::make($request->password),
             'user_type' => 'vendor',
         ]);
 
         // Create vendor
-        $vendor = Vendor::create([
+        $vendorData = [
             'user_id' => $user->id,
             'full_name' => $request->full_name,
-            'business_email' => $request->business_email,
             'phone' => $request->phone,
             'status' => 'pending',
-        ]);
+        ];
+        
+        // Only add business_email if provided
+        if ($request->has('business_email') && $request->business_email) {
+            $vendorData['business_email'] = $request->business_email;
+        }
+        
+        $vendor = Vendor::create($vendorData);
 
         // Generate token
         $token = $user->createToken('vendor-token')->plainTextToken;

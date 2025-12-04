@@ -32,7 +32,7 @@ class ShopController extends Controller
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'country' => 'required|string',
-            'street' => 'required|string',
+            'street' => 'nullable|string',
             'opening_time' => 'nullable|date_format:H:i',
             'closing_time' => 'nullable|date_format:H:i',
         ]);
@@ -164,6 +164,91 @@ class ShopController extends Controller
             'message' => 'Delivery zone added successfully',
             'data' => $deliveryZone,
         ], 201);
+    }
+
+    // Update Delivery Zone
+    public function updateDeliveryZone(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'location_name' => 'required|string',
+            'delivery_fee' => 'required|numeric|min:0',
+            'estimated_delivery_time' => 'required|integer|min:1',
+            'delivery_type' => 'required|in:vendor,platform',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $vendor = $request->user()->vendor;
+        $shop = Shop::where('vendor_id', $vendor->id)->first();
+
+        if (!$shop) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Shop not found.',
+            ], 404);
+        }
+
+        $deliveryZone = DeliveryZone::where('id', $id)
+            ->where('shop_id', $shop->id)
+            ->first();
+
+        if (!$deliveryZone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Delivery zone not found.',
+            ], 404);
+        }
+
+        $deliveryZone->update([
+            'location_name' => $request->location_name,
+            'delivery_fee' => $request->delivery_fee,
+            'estimated_delivery_time' => $request->estimated_delivery_time,
+            'delivery_type' => $request->delivery_type,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Delivery zone updated successfully',
+            'data' => $deliveryZone,
+        ]);
+    }
+
+    // Delete Delivery Zone
+    public function deleteDeliveryZone(Request $request, $id)
+    {
+        $vendor = $request->user()->vendor;
+        $shop = Shop::where('vendor_id', $vendor->id)->first();
+
+        if (!$shop) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Shop not found.',
+            ], 404);
+        }
+
+        $deliveryZone = DeliveryZone::where('id', $id)
+            ->where('shop_id', $shop->id)
+            ->first();
+
+        if (!$deliveryZone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Delivery zone not found.',
+            ], 404);
+        }
+
+        $deliveryZone->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Delivery zone deleted successfully',
+        ]);
     }
 
     // Save Payment Details

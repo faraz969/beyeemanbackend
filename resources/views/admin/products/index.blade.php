@@ -101,7 +101,7 @@
                                             @endphp
                                             <img src="{{ asset('storage/' . $primaryImage->image_path) }}" 
                                                  alt="{{ $product->name }}" 
-                                                 class="h-12 w-12 object-cover rounded-lg mr-3">
+                                                 class="h-12 w-12 object-cover rounded-lg mr-3" width="48" height="48">
                                         @else
                                             <div class="h-12 w-12 bg-gray-200 rounded-lg mr-3 flex items-center justify-center">
                                                 <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

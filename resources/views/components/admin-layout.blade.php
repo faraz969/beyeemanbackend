@@ -20,7 +20,7 @@
                 <div class="flex flex-col h-full">
                     <!-- Logo -->
                     <div class="flex items-center justify-center h-16 bg-gray-900">
-                        <h1 class="text-xl font-bold">Beeyman Admin</h1>
+                        <h1 class="text-xl font-bold">Beyeeman Admin</h1>
                     </div>
 
                     <!-- Navigation -->

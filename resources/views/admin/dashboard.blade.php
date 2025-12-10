@@ -62,7 +62,7 @@
 
         <!-- Welcome Card -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Welcome to Beeyman Admin Panel</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Welcome to Beyeeman Admin Panel</h3>
             <p class="text-gray-600 mb-4">
                 You are logged in as <strong>{{ Auth::user()->name }}</strong> with the following roles:
             </p>

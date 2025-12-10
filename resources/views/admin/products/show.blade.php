@@ -172,7 +172,7 @@
                         <div class="relative">
                             <img src="{{ asset('storage/' . $image->image_path) }}" 
                                  alt="Product Image" 
-                                 class="w-full h-48 object-cover rounded-lg border border-gray-300">
+                                 class="w-20 h-20 object-cover rounded-lg border border-gray-300">
                             @if($image->is_primary)
                                 <span class="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">Primary</span>
                             @endif

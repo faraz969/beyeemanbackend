@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\ProductVideo;
 use App\Models\Category;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -142,6 +143,13 @@ class ProductController extends Controller
                 'video_path' => $videoPath,
             ]);
         }
+
+        // Log activity
+        ActivityLogService::logCreate(
+            $product,
+            "Product '{$product->name}' created by vendor",
+            $request
+        );
 
         return response()->json([
             'success' => true,
@@ -353,6 +361,7 @@ class ProductController extends Controller
         }
 
         // Update product fields
+        $oldValues = $product->toArray();
         $updateData = [];
         $fields = ['name', 'category_id', 'description', 'price', 'discount', 'quantity_available', 'sku', 'batch_no', 'expiry_date', 'weight', 'size', 'delivery_enabled'];
         foreach ($fields as $field) {
@@ -362,6 +371,19 @@ class ProductController extends Controller
         }
 
         $product->update($updateData);
+        
+        // Log activity
+        $newValues = array_intersect_key($product->fresh()->toArray(), $updateData);
+        $oldValuesFiltered = array_intersect_key($oldValues, $updateData);
+        if (!empty($updateData)) {
+            ActivityLogService::logUpdate(
+                $product,
+                "Product '{$product->name}' updated by vendor",
+                $oldValuesFiltered,
+                $newValues,
+                $request
+            );
+        }
 
         // Handle new images
         if ($request->hasFile('images')) {
@@ -416,7 +438,15 @@ class ProductController extends Controller
             ], 404);
         }
 
+        $productName = $product->name;
         $product->delete();
+
+        // Log activity
+        ActivityLogService::logDelete(
+            $product,
+            "Product '{$productName}' deleted by vendor",
+            request()
+        );
 
         return response()->json([
             'success' => true,

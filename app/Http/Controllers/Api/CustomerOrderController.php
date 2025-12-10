@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\AvailabilityRequest;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -150,6 +151,13 @@ class CustomerOrderController extends Controller
             ]);
         }
 
+        // Log activity
+        ActivityLogService::logCreate(
+            $order,
+            "Order #{$order->order_number} created by customer",
+            $request
+        );
+
         // Initialize Paystack payment
         $paystackService = app(\App\Services\PaystackService::class);
         $user = $request->user();
@@ -283,9 +291,28 @@ class CustomerOrderController extends Controller
         }
 
         // Update order status
+        $oldDeliveryStatus = $order->delivery_status;
+        $oldOrderStatus = $order->order_status;
         $order->delivery_status = 'delivered';
         $order->order_status = 'delivered';
         $order->save();
+
+        // Log activity
+        ActivityLogService::log(
+            'order.delivery_confirmed',
+            "Order #{$order->order_number} delivery confirmed by customer",
+            $order,
+            [
+                'delivery_status' => $oldDeliveryStatus,
+                'order_status' => $oldOrderStatus,
+            ],
+            [
+                'delivery_status' => 'delivered',
+                'order_status' => 'delivered',
+            ],
+            null,
+            $request
+        );
 
         // Initiate transfer to vendor
         $transferResult = $this->initiateVendorTransfer($order);

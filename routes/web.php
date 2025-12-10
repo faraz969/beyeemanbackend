@@ -93,6 +93,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('/transfers', [App\Http\Controllers\Admin\TransferController::class, 'index'])->name('transfers.index');
     Route::get('/transfers/{id}', [App\Http\Controllers\Admin\TransferController::class, 'show'])->name('transfers.show');
     Route::post('/transfers/{id}/verify', [App\Http\Controllers\Admin\TransferController::class, 'verify'])->name('transfers.verify');
+    
+    // Activity Log Routes
+    Route::get('/activity-logs', [App\Http\Controllers\Admin\ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/{id}', [App\Http\Controllers\Admin\ActivityLogController::class, 'show'])->name('activity-logs.show');
 });
 
 require __DIR__.'/auth.php';

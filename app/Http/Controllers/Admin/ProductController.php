@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -99,8 +100,19 @@ class ProductController extends Controller
         ]);
         
         $product = Product::findOrFail($id);
+        $oldStatus = $product->status;
         $product->status = $request->status;
         $product->save();
+        
+        // Log activity
+        ActivityLogService::logStatusChange(
+            $product,
+            'status',
+            $oldStatus,
+            $request->status,
+            "Product '{$product->name}' status changed from '{$oldStatus}' to '{$request->status}'",
+            $request
+        );
         
         return redirect()->back()->with('success', 'Product status updated successfully.');
     }

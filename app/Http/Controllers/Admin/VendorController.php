@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Vendor;
 use App\Models\Shop;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class VendorController extends Controller
@@ -81,19 +82,50 @@ class VendorController extends Controller
         ]);
         
         $vendor = Vendor::findOrFail($id);
+        $oldStatus = $vendor->status;
         $vendor->status = $request->status;
         $vendor->save();
         
+        // Log activity
+        ActivityLogService::logStatusChange(
+            $vendor,
+            'status',
+            $oldStatus,
+            $request->status,
+            "Vendor status changed from '{$oldStatus}' to '{$request->status}'",
+            $request
+        );
+        
         // If suspending vendor, also set shop to inactive
         if ($request->status === 'suspended' && $vendor->shop) {
+            $shopOldStatus = $vendor->shop->status;
             $vendor->shop->status = 'inactive';
             $vendor->shop->save();
+            
+            ActivityLogService::logStatusChange(
+                $vendor->shop,
+                'status',
+                $shopOldStatus,
+                'inactive',
+                "Shop status changed to 'inactive' due to vendor suspension",
+                $request
+            );
         }
         
         // If activating vendor, activate shop if it was set up
         if ($request->status === 'active' && $vendor->shop && $vendor->shop->status === 'inactive') {
+            $shopOldStatus = $vendor->shop->status;
             $vendor->shop->status = 'active';
             $vendor->shop->save();
+            
+            ActivityLogService::logStatusChange(
+                $vendor->shop,
+                'status',
+                $shopOldStatus,
+                'active',
+                "Shop status changed to 'active' due to vendor activation",
+                $request
+            );
         }
         
         return redirect()->back()->with('success', 'Vendor status updated successfully.');
@@ -118,8 +150,19 @@ class VendorController extends Controller
             return redirect()->back()->with('error', 'Vendor does not have a shop.');
         }
         
+        $oldStatus = $vendor->shop->status;
         $vendor->shop->status = $request->shop_status;
         $vendor->shop->save();
+        
+        // Log activity
+        ActivityLogService::logStatusChange(
+            $vendor->shop,
+            'status',
+            $oldStatus,
+            $request->shop_status,
+            "Shop status changed from '{$oldStatus}' to '{$request->shop_status}'",
+            $request
+        );
         
         return redirect()->back()->with('success', 'Shop status updated successfully.');
     }

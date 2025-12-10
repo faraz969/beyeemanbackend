@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -101,6 +102,11 @@ class OrderController extends Controller
         ]);
         
         $order = Order::findOrFail($id);
+        $oldValues = [
+            'order_status' => $order->order_status,
+            'payment_status' => $order->payment_status,
+            'delivery_status' => $order->delivery_status,
+        ];
         
         if ($request->has('order_status')) {
             $order->order_status = $request->order_status;
@@ -115,6 +121,34 @@ class OrderController extends Controller
         }
         
         $order->save();
+        
+        // Log activity
+        $newValues = [
+            'order_status' => $order->order_status,
+            'payment_status' => $order->payment_status,
+            'delivery_status' => $order->delivery_status,
+        ];
+        
+        $changes = [];
+        if ($oldValues['order_status'] !== $newValues['order_status']) {
+            $changes[] = "Order status: {$oldValues['order_status']} → {$newValues['order_status']}";
+        }
+        if ($oldValues['payment_status'] !== $newValues['payment_status']) {
+            $changes[] = "Payment status: {$oldValues['payment_status']} → {$newValues['payment_status']}";
+        }
+        if ($oldValues['delivery_status'] !== $newValues['delivery_status']) {
+            $changes[] = "Delivery status: {$oldValues['delivery_status']} → {$newValues['delivery_status']}";
+        }
+        
+        if (!empty($changes)) {
+            ActivityLogService::logUpdate(
+                $order,
+                "Order #{$order->order_number} status updated: " . implode(', ', $changes),
+                $oldValues,
+                $newValues,
+                $request
+            );
+        }
         
         return redirect()->back()->with('success', 'Order status updated successfully.');
     }

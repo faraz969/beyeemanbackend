@@ -47,6 +47,7 @@ class CustomerShopController extends Controller
                 'shop_logo' => $shop->shop_logo ? asset('storage/' . $shop->shop_logo) : null,
                 'description' => $shop->description,
                 'business_category' => $shop->category,
+                'currency' => $shop->currency,
                 'primary_contact' => $shop->primary_contact,
                 'alternate_contact' => $shop->alternate_contact,
                 'business_email' => $shop->business_email,

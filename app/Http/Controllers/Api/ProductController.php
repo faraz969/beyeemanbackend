@@ -118,7 +118,7 @@ class ProductController extends Controller
             'weight' => $data['weight'] ?? null,
             'size' => $data['size'] ?? null,
             'delivery_enabled' => $data['delivery_enabled'],
-            'status' => 'draft',
+            'status' => 'active',
         ]);
 
         // Handle images

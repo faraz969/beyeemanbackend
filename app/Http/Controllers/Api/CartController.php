@@ -36,6 +36,7 @@ class CartController extends Controller
                         'image' => $primaryImage ? asset('storage/' . $primaryImage->image_path) : null,
                         'shop_id' => $item->product->shop_id ?? null,
                         'shop_name' => $item->product->shop->shop_name ?? '',
+                        'currency' => $item->product->shop->currency ?? 'USD',
                     ],
                 ];
             });

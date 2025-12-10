@@ -57,6 +57,7 @@ class CustomerProductController extends Controller
                     'id' => $product->shop->id,
                     'name' => $product->shop->shop_name,
                     'logo' => $product->shop->shop_logo ? asset('storage/' . $product->shop->shop_logo) : null,
+                    'currency' => $product->shop->currency,
                 ],
                 'category' => [
                     'id' => $product->category->id ?? null,

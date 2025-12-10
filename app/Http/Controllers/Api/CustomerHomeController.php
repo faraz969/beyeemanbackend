@@ -75,6 +75,8 @@ class CustomerHomeController extends Controller
                     'discount' => $product->discount,
                     'image' => $primaryImage ? asset('storage/' . $primaryImage->image_path) : null,
                     'shop_name' => $product->shop->shop_name ?? '',
+                    'shop_id' => $product->shop->id ?? null,
+                    'currency' => $product->shop->currency ?? 'USD',
                     'category' => $product->category->name ?? '',
                 ];
             });
@@ -131,6 +133,8 @@ class CustomerHomeController extends Controller
                     'discount' => $product->discount,
                     'image' => $primaryImage ? asset('storage/' . $primaryImage->image_path) : null,
                     'shop_name' => $product->shop->shop_name ?? '',
+                    'shop_id' => $product->shop->id ?? null,
+                    'currency' => $product->shop->currency ?? 'USD',
                     'category' => $product->category->name ?? '',
                 ];
             });

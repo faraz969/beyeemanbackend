@@ -74,7 +74,8 @@ class BannerController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,avif,webp|max:2048',
+            // Use mimes (not image): Laravel 8's image rule does not allow avif
+            'image' => 'required|mimes:jpeg,png,jpg,gif,avif,webp|max:2048',
             'link_type' => 'nullable|in:product,vendor,category,url',
             'link_id' => 'nullable|integer|required_if:link_type,product,vendor,category',
             'external_url' => 'nullable|url|required_if:link_type,url',
@@ -179,7 +180,8 @@ class BannerController extends Controller
         
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // Use mimes (not image): Laravel 8's image rule does not allow avif
+            'image' => 'nullable|mimes:jpeg,png,jpg,gif,avif,webp|max:2048',
             'link_type' => 'nullable|in:product,vendor,category,url',
             'link_id' => 'nullable|integer|required_if:link_type,product,vendor,category',
             'external_url' => 'nullable|url|required_if:link_type,url',

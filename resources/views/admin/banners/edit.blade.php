@@ -66,7 +66,7 @@
                                id="image" 
                                accept="image/*"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="mt-1 text-sm text-gray-500">JPEG, PNG, JPG, GIF up to 2MB. Leave empty to keep current image. Recommended size: 1200x400px</p>
+                        <p class="mt-1 text-sm text-gray-500">JPEG, PNG, JPG, GIF, WebP, AVIF up to 2MB. Leave empty to keep current image. Recommended size: 1200x400px</p>
                         @error('image')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
